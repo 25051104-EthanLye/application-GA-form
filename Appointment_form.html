@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remi+ | Make an Appointment</title>
+    <style>
+        /* 1. The Moving Gradient Background */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            /* Creates a smooth blend between white, soft lavender, and your #7B68EE purple */
+            background: linear-gradient(-45deg, #ffffff, #E6E6FA, #7B68EE, #e0dcf8);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* The animation keyframes for the moving background */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 2. Top Navigation Bar */
+        .navbar {
+            background-color: white;
+            padding: 15px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .navbar .logo {
+            color: #7B68EE;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* 3. Main Form Container */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .form-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 650px; /* Slightly wider to fit the two columns beautifully */
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #222;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        /* 4. Two-Column Grid Layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .full-width {
+            grid-column: 1 / -1; /* Forces the element to span both columns */
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #111;
+            font-size: 14px;
+        }
+        
+        /* 5. Input Styling */
+        input[type="text"],
+        input[type="email"],
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+            color: #333;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="datetime-local"]:focus {
+            border-color: #7B68EE;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.2); /* Soft purple glow when typing */
+        }
+
+        /* 6. Checkbox Styling */
+        .checkbox-section label {
+            font-weight: 600;
+            color: #111;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            accent-color: #7B68EE; /* Makes the checkmark purple */
+            cursor: pointer;
+        }
+        .checkbox-container span {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* 7. Button Styling */
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #7B68EE, #624fd1);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.3s, transform 0.1s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:active {
+            transform: scale(0.99); /* Tiny click effect */
+        }
+
+        /* 8. Notification Box */
+        #notification {
+            display: none; 
+            padding: 15px; 
+            background-color: #e6f4ea; 
+            color: #137333; 
+            border: 1px solid #ceead6;
+            border-radius: 6px; 
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        /* Mobile Responsiveness: Stacks columns on small screens */
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Navigation Bar -->
+<nav class="navbar">
+    <div class="logo">Remi+</div>
+    
+    <div class="nav-links" style="float: right;">
+        <a href="dashboard.html" style="text-decoration: none; color: #7B68EE; font-weight: 600; margin-right: 20px;">Dashboard</a>
+        <a href="appointment_form.html" style="text-decoration: none; color: #7B68EE; font-weight: 600;">Book Appointment</a>
+    </div>
+</nav>
+
+<!-- Main Content Area -->
+<div class="main-wrapper">
+    <div class="form-container">
+        <h2>Book a Client Appointment</h2>
+        
+        <!-- Hidden notification box -->
+        <div id="notification">Appointment booked successfully! We will contact you soon.</div>
+        
+        <form id="appointmentForm">
+            <div class="form-grid">
+                
+                <!-- Row 1 -->
+                <div class="form-group">
+                    <label for="caretakerName">Caretaker Name</label>
+                    <input type="text" id="caretakerName" name="caretakerName" placeholder="Text Input" required>
+                </div>
+                <div class="form-group">
+                    <label for="clientName">Client (Elderly) Name</label>
+                    <input type="text" id="clientName" name="clientName" placeholder="Text Input" required>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="form-group">
+                    <label for="email">Caretaker Email</label>
+                    <input type="email" id="email" name="email" placeholder="Caretaker Email" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location of Appointment</label>
+                    <input type="text" id="location" name="location" placeholder="Location of Appointment" required>
+                </div>
+
+                <!-- Row 3 (Full Width) -->
+                <div class="form-group full-width">
+                    <label for="appointmentTime">Date & Time</label>
+                    <input type="datetime-local" id="appointmentTime" name="appointmentTime" required>
+                </div>
+
+                <!-- Row 4: Checkbox (Full Width) -->
+                <div class="checkbox-section full-width">
+                    <label>Remind me in advance</label>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="wantsReminder" name="wantsReminder" value="yes">
+                        <span>Remind me in advance</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="full-width">Submit Appointment</button>
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript to handle n8n webhook -->
+<script>
+    document.getElementById('appointmentForm').addEventListener('submit', function(event) {
+        event.preventDefault(); 
+        
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerText;
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+
+        // PASTE YOUR N8N PRODUCTION WEBHOOK URL HERE
+        const webhookUrl = 'https://n8ngc.codeblazar.org/webhook/appointment-form';
+
+        const formData = new FormData(this);
+
+        fetch(webhookUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if(response.ok) {
+                document.getElementById('notification').style.display = 'block';
+                this.reset();
+            } else {
+                alert('Something went wrong on the server. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Could not connect. Please check your internet connection.');
+        })
+        .finally(() => {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+    });
+</script>
+
+</body>
+</html>

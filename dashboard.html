@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            padding: 40px;
+            color: #333;
+        }
+        .dashboard-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<!-- Top Navigation Bar -->
+<nav class="navbar">
+    <div class="logo">Remi+</div>
+    
+    <div class="nav-links" style="float: right;">
+        <a href="dashboard.html" style="text-decoration: none; color: #7B68EE; font-weight: 600; margin-right: 20px;">Dashboard</a>
+        <a href="appointment_form.html" style="text-decoration: none; color: #7B68EE; font-weight: 600;">Book Appointment</a>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <h2>Elderly Care Appointment Dashboard</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Caretaker Name</th>
+                <th>Client Name</th>
+                <th>Location</th>
+                <th>Appointment Time</th>
+            </tr>
+        </thead>
+        <!-- The JavaScript will inject the Google Sheets data inside this tbody -->
+        <tbody id="tableBody">
+            <tr>
+                <td colspan="4" class="loading" id="loadingText">Loading appointments from n8n...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 1. PASTE YOUR NEW "GET" WEBHOOK URL HERE
+    const n8nGetUrl = 'https://n8ngc.codeblazar.org/webhook/dashboard';
+
+    // 2. Fetch the data when the page loads
+    fetch(n8nGetUrl)
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // Clear the "Loading" text
+            
+            // 3. Check if we have data
+            if(data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" class="loading">No appointments found.</td></tr>';
+                return;
+            }
+
+            // 4. Loop through each row from Google Sheets and create a table row
+            // Note: The words in the brackets bracket MUST match your Google Sheet Headers exactly!
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                tr.innerHTML = `
+                    <td>${row['Caretaker Name'] || 'N/A'}</td>
+                    <td>${row['Client Name'] || 'N/A'}</td>
+                    <td>${row['Location'] || 'N/A'}</td>
+                    <td>${row['Appointment Time'] || 'N/A'}</td>
+                `;
+                
+                tableBody.appendChild(tr);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            document.getElementById('loadingText').innerText = "Failed to load data. Make sure your n8n workflow is running!";
+            document.getElementById('loadingText').style.color = "red";
+        });
+</script>
+
+</body>
+</html>
