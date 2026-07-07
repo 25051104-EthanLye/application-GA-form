@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remi+ | Make an Appointment</title>
     <style>
-        /* 1. The Moving Gradient Background */
         body {
             margin: 0;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            /* Creates a smooth blend between white, soft lavender, and your #7B68EE purple */
             background: linear-gradient(-45deg, #ffffff, #E6E6FA, #7B68EE, #e0dcf8);
             background-size: 400% 400%;
             animation: gradientBG 12s ease infinite;
@@ -17,15 +15,11 @@
             display: flex;
             flex-direction: column;
         }
-
-        /* The animation keyframes for the moving background */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        /* 2. Top Navigation Bar */
         .navbar {
             background-color: white;
             padding: 15px 40px;
@@ -39,8 +33,6 @@
             font-weight: 800;
             letter-spacing: -0.5px;
         }
-
-        /* 3. Main Form Container */
         .main-wrapper {
             flex: 1;
             display: flex;
@@ -54,7 +46,7 @@
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
             width: 100%;
-            max-width: 650px; /* Slightly wider to fit the two columns beautifully */
+            max-width: 650px; 
         }
         h2 {
             margin-top: 0;
@@ -63,16 +55,12 @@
             text-align: center;
             font-size: 24px;
         }
-
-        /* 4. Two-Column Grid Layout */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        .full-width {
-            grid-column: 1 / -1; /* Forces the element to span both columns */
-        }
+        .full-width { grid-column: 1 / -1; }
         
         .form-group label {
             display: block;
@@ -82,10 +70,11 @@
             font-size: 14px;
         }
         
-        /* 5. Input Styling */
         input[type="text"],
         input[type="email"],
-        input[type="datetime-local"] {
+        input[type="date"],
+        input[type="time"],
+        textarea {
             width: 100%;
             padding: 12px 15px;
             border: 1px solid #d1d5db;
@@ -94,40 +83,18 @@
             font-size: 14px;
             color: #333;
             transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
         }
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="datetime-local"]:focus {
+        input:focus, textarea:focus {
             border-color: #7B68EE;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.2); /* Soft purple glow when typing */
+            box-shadow: 0 0 0 3px rgba(123, 104, 238, 0.2); 
+        }
+        textarea {
+            resize: vertical; 
+            min-height: 80px;
         }
 
-        /* 6. Checkbox Styling */
-        .checkbox-section label {
-            font-weight: 600;
-            color: #111;
-            font-size: 14px;
-            display: block;
-            margin-bottom: 8px;
-        }
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-        }
-        .checkbox-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 10px;
-            accent-color: #7B68EE; /* Makes the checkmark purple */
-            cursor: pointer;
-        }
-        .checkbox-container span {
-            font-size: 14px;
-            color: #333;
-        }
-
-        /* 7. Button Styling */
         button {
             width: 100%;
             padding: 14px;
@@ -141,14 +108,9 @@
             margin-top: 10px;
             transition: opacity 0.3s, transform 0.1s;
         }
-        button:hover {
-            opacity: 0.9;
-        }
-        button:active {
-            transform: scale(0.99); /* Tiny click effect */
-        }
+        button:hover { opacity: 0.9; }
+        button:active { transform: scale(0.99); }
 
-        /* 8. Notification Box */
         #notification {
             display: none; 
             padding: 15px; 
@@ -158,35 +120,24 @@
             border-radius: 6px; 
             margin-bottom: 25px;
             font-size: 14px;
+            text-align: center;
+            font-weight: bold;
         }
-
-        /* Mobile Responsiveness: Stacks columns on small screens */
         @media (max-width: 600px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
+            .form-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-<!-- Top Navigation Bar -->
-<nav class="navbar">
-    <div class="logo">Remi+</div>
-    
-    <div class="nav-links" style="float: right;">
-        <a href="dashboard.html" style="text-decoration: none; color: #7B68EE; font-weight: 600; margin-right: 20px;">Dashboard</a>
-        <a href="appointment_form.html" style="text-decoration: none; color: #7B68EE; font-weight: 600;">Book Appointment</a>
-    </div>
-</nav>
+<nav class="navbar"><div class="logo">Remi+</div></nav>
 
-<!-- Main Content Area -->
 <div class="main-wrapper">
     <div class="form-container">
         <h2>Book a Client Appointment</h2>
         
-        <!-- Hidden notification box -->
-        <div id="notification">Appointment booked successfully! We will contact you soon.</div>
+        <!-- Success Notification -->
+        <div id="notification">Appointment booked successfully! Redirecting to dashboard...</div>
         
         <form id="appointmentForm">
             <div class="form-grid">
@@ -194,79 +145,90 @@
                 <!-- Row 1 -->
                 <div class="form-group">
                     <label for="caretakerName">Caretaker Name</label>
-                    <input type="text" id="caretakerName" name="caretakerName" placeholder="Text Input" required>
+                    <input type="text" id="caretakerName" name="Caretaker Name" required>
                 </div>
                 <div class="form-group">
                     <label for="clientName">Client (Elderly) Name</label>
-                    <input type="text" id="clientName" name="clientName" placeholder="Text Input" required>
+                    <input type="text" id="clientName" name="Client Name" required>
                 </div>
 
                 <!-- Row 2 -->
                 <div class="form-group">
                     <label for="email">Caretaker Email</label>
-                    <input type="email" id="email" name="email" placeholder="Caretaker Email" required>
+                    <input type="email" id="email" name="Caretaker Email" required>
                 </div>
                 <div class="form-group">
                     <label for="location">Location of Appointment</label>
-                    <input type="text" id="location" name="location" placeholder="Location of Appointment" required>
+                    <input type="text" id="location" name="Location" required>
                 </div>
 
-                <!-- Row 3 (Full Width) -->
+                <!-- Row 3: Separated Date and Time -->
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="Date" required>
+                </div>
+                <div class="form-group">
+                    <label for="time">Time</label>
+                    <input type="time" id="time" name="Time" required>
+                </div>
+
+                <!-- Row 4: Remarks -->
                 <div class="form-group full-width">
-                    <label for="appointmentTime">Date & Time</label>
-                    <input type="datetime-local" id="appointmentTime" name="appointmentTime" required>
-                </div>
-
-                <!-- Row 4: Checkbox (Full Width) -->
-                <div class="checkbox-section full-width">
-                    <label>Remind me in advance</label>
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="wantsReminder" name="wantsReminder" value="yes">
-                        <span>Remind me in advance</span>
-                    </div>
+                    <label for="remarks">Remarks / Special Instructions</label>
+                    <textarea id="remarks" name="Remarks" placeholder="Any special needs or notes..."></textarea>
                 </div>
 
                 <!-- Submit Button -->
                 <button type="submit" id="submitBtn" class="full-width">Submit Appointment</button>
-                
             </div>
         </form>
     </div>
 </div>
 
-<!-- JavaScript to handle n8n webhook -->
 <script>
     document.getElementById('appointmentForm').addEventListener('submit', function(event) {
         event.preventDefault(); 
         
         const btn = document.getElementById('submitBtn');
-        const originalText = btn.innerText;
         btn.innerText = "Processing...";
         btn.disabled = true;
 
-        // PASTE YOUR N8N PRODUCTION WEBHOOK URL HERE
-        const webhookUrl = 'https://n8ngc.codeblazar.org/webhook/appointment-form';
+        // 1. PASTE YOUR N8N POST WEBHOOK URL HERE
+        const webhookUrl = 'https://n8ngc.codeblazar.org/webhook-test/appointment-form';
 
+        // 2. Gather form data
         const formData = new FormData(this);
 
+        // 3. Automatically set the Status to 'Pending'
+        formData.append('Status', 'Pending');
+
+        // 4. Map ONLY the Time to the 'Appointment Time' column for the dashboard
+        formData.append('Appointment Time', formData.get('Time'));
+
+        // 5. Send data securely to n8n
         fetch(webhookUrl, {
             method: 'POST',
             body: formData
         })
         .then(response => {
             if(response.ok) {
+                // Show success message and redirect
                 document.getElementById('notification').style.display = 'block';
-                this.reset();
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html'; 
+                }, 1000);
             } else {
+                // Handle server-side errors cleanly
                 alert('Something went wrong on the server. Please try again.');
+                btn.innerText = "Submit Appointment";
+                btn.disabled = false;
             }
         })
         .catch(error => {
+            // Handle network/connection errors cleanly
             console.error('Error:', error);
             alert('Could not connect. Please check your internet connection.');
-        })
-        .finally(() => {
-            btn.innerText = originalText;
+            btn.innerText = "Submit Appointment";
             btn.disabled = false;
         });
     });
