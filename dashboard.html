@@ -8,13 +8,24 @@
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; padding: 40px; margin: 0; }
         .navbar { background-color: white; padding: 15px 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; position: absolute; top: 0; left: 0; }
         .navbar .logo { color: #7B68EE; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
-        .container { background-color: white; padding: 30px; border-radius: 12px; max-width: 1000px; margin: 80px auto 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .container { background-color: white; padding: 30px; border-radius: 12px; max-width: 1100px; margin: 80px auto 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
         h2 { margin-top: 0; color: #333; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 15px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eaeaea; }
         th { background-color: #f8f9fa; color: #555; font-weight: 600; }
         tr:hover { background-color: #fbfbfe; }
         .status-badge { background-color: #fff3cd; color: #856404; padding: 5px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        
+        .btn-edit { background-color: #7B68EE; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-delete { background-color: #ff4d4f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; margin-left: 5px; }
+        .btn-edit:hover { background-color: #624fd1; }
+        .btn-delete:hover { background-color: #d9363e; }
+        .btn-submit { background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+
+        .edit-row { background-color: #f9f8ff; display: none; }
+        .edit-form-container { padding: 20px; border-left: 4px solid #7B68EE; }
+        .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .edit-grid input, .edit-grid select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-family: inherit; }
     </style>
 </head>
 <body>
@@ -26,48 +37,147 @@
     <table>
         <thead>
             <tr>
-                <th>Appointment Time</th>
+                <th>Date</th>
+                <th>Time</th>
                 <th>Client Name</th>
                 <th>Location</th>
                 <th>Status</th>
                 <th>Remarks</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody id="tableBody">
-            <tr><td colspan="5" style="text-align: center; padding: 30px;">Loading data securely...</td></tr>
+            <tr><td colspan="7" style="text-align: center; padding: 30px;">Loading data securely...</td></tr>
         </tbody>
     </table>
 </div>
 
 <script>
-    // 1. PASTE YOUR N8N GET WEBHOOK URL HERE
     const getWebhookUrl = 'https://n8ngc.codeblazar.org/webhook/dashboard';
+    const updateWebhookUrl = 'https://n8ngc.codeblazar.org/webhook/dashboard-update';
+    const deleteWebhookUrl = 'https://n8ngc.codeblazar.org/webhook/dashboard-delete';
 
-    fetch(getWebhookUrl)
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = ''; 
+    function loadData() {
+        fetch(getWebhookUrl)
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('tableBody');
+                tableBody.innerHTML = ''; 
 
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                
-                // Using the exact structure you requested!
-                tr.innerHTML = `
-                    <td><strong>${row['Time'] || 'N/A'}</strong></td>
-                    <td>${row['Client Name'] || 'N/A'}</td>
-                    <td>${row['Location'] || 'N/A'}</td>
-                    <td><span class="status-badge">${row['Status'] || 'Pending'}</span></td>
-                    <td>${row['Remarks'] || '-'}</td>
-                `;
-                tableBody.appendChild(tr);
+                data.forEach(row => {
+                    const rowId = row.row_number; 
+
+                    // We add a specific ID to this row so we can instantly update/delete it!
+                    const mainRow = document.createElement('tr');
+                    mainRow.id = `main-row-${rowId}`;
+                    mainRow.innerHTML = `
+                        <td id="display-date-${rowId}"><strong>${row['Appointment Date'] || 'N/A'}</strong></td>
+                        <td id="display-time-${rowId}"><strong>${row['Time'] || 'N/A'}</strong></td>
+                        <td>${row['Client Name'] || 'N/A'}</td>
+                        <td id="display-location-${rowId}">${row['Location'] || 'N/A'}</td>
+                        <td id="display-status-${rowId}"><span class="status-badge">${row['Status'] || 'Pending'}</span></td>
+                        <td id="display-remarks-${rowId}">${row['Remarks'] || '-'}</td>
+                        <td>
+                            <button class="btn-edit" onclick="toggleEditForm(${rowId})">Edit</button>
+                            <button class="btn-delete" onclick="deleteAppointment(${rowId})">Delete</button>
+                        </td>
+                    `;
+                    
+                    const editRow = document.createElement('tr');
+                    editRow.id = `edit-form-${rowId}`;
+                    editRow.className = 'edit-row';
+                    editRow.innerHTML = `
+                        <td colspan="7">
+                            <div class="edit-form-container">
+                                <strong>Update Appointment Details:</strong><br><br>
+                                <form onsubmit="submitUpdate(event, ${rowId})">
+                                    <div class="edit-grid">
+                                        <div><label>Date</label><input type="date" id="edit-date-${rowId}" value="${row['Appointment Date'] || ''}" required></div>
+                                        <div><label>Time</label><input type="time" id="edit-time-${rowId}" value="${row['Time'] || ''}" required></div>
+                                        <div><label>Location</label><input type="text" id="edit-location-${rowId}" value="${row['Location'] || ''}" required></div>
+                                        <div>
+                                            <label>Status</label>
+                                            <select id="edit-status-${rowId}">
+                                                <option value="Pending" ${row['Status'] === 'Pending' ? 'selected' : ''}>Pending</option>
+                                                <option value="Confirmed" ${row['Status'] === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                                <option value="Completed" ${row['Status'] === 'Completed' ? 'selected' : ''}>Completed</option>
+                                            </select>
+                                        </div>
+                                        <div style="grid-column: 1 / -1;"><label>Remarks</label><input type="text" id="edit-remarks-${rowId}" value="${row['Remarks'] || ''}"></div>
+                                    </div>
+                                    <button type="submit" id="btn-save-${rowId}" class="btn-submit">Save Changes</button>
+                                </form>
+                            </div>
+                        </td>
+                    `;
+
+                    tableBody.appendChild(mainRow);
+                    tableBody.appendChild(editRow);
+                });
+            })
+            .catch(error => {
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">Failed to load data. Is n8n active?</td></tr>';
             });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Failed to load data. Make sure n8n is active.</td></tr>';
-        });
-</script>
+    }
 
+    function toggleEditForm(id) {
+        const formRow = document.getElementById(`edit-form-${id}`);
+        formRow.style.display = formRow.style.display === 'table-row' ? 'none' : 'table-row';
+    }
+
+    function submitUpdate(event, id) {
+        event.preventDefault(); 
+        
+        const saveBtn = document.getElementById(`btn-save-${id}`);
+        saveBtn.innerText = "Saving...";
+        
+        const newDate = document.getElementById(`edit-date-${id}`).value;
+        const newTime = document.getElementById(`edit-time-${id}`).value;
+        const newLoc = document.getElementById(`edit-location-${id}`).value;
+        const newStatus = document.getElementById(`edit-status-${id}`).value;
+        const newRemarks = document.getElementById(`edit-remarks-${id}`).value;
+
+        const payload = {
+            row_number: id, Date: newDate, Time: newTime, Location: newLoc, Status: newStatus, Remarks: newRemarks
+        };
+
+        fetch(updateWebhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            // Instantly update the text on the screen!
+            document.getElementById(`display-date-${id}`).innerHTML = `<strong>${newDate}</strong>`;
+            document.getElementById(`display-time-${id}`).innerHTML = `<strong>${newTime}</strong>`;
+            document.getElementById(`display-location-${id}`).innerText = newLoc;
+            document.getElementById(`display-status-${id}`).innerHTML = `<span class="status-badge">${newStatus}</span>`;
+            document.getElementById(`display-remarks-${id}`).innerText = newRemarks;
+            
+            toggleEditForm(id); // Close the dropdown form
+            saveBtn.innerText = "Save Changes";
+        })
+        .catch(() => alert('Error updating. Please check your n8n workflow.'));
+    }
+
+    function deleteAppointment(id) {
+        if(confirm("Are you sure you want to completely delete this appointment?")) {
+            
+            fetch(deleteWebhookUrl, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ row_number: id })
+            })
+            .then(() => {
+                // Instantly remove the row from the screen!
+                document.getElementById(`main-row-${id}`).remove();
+                document.getElementById(`edit-form-${id}`).remove();
+            })
+            .catch(() => alert('Error deleting. Please check your n8n workflow.'));
+        }
+    }
+
+    loadData();
+</script>
 </body>
 </html>
